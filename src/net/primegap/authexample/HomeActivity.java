@@ -31,12 +31,20 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.savagelook.android.UrlJsonAsyncTask;
+import com.savagelook.android.UrlJsonAsyncTaskForArray;
 
 public class HomeActivity extends SherlockActivity {
-
-	private static final String TASKS_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/tasks.json";
-	private static final String TOGGLE_TASKS_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/tasks/";
+	//users/sign_in
+//	private static final String TASKS_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/tasks.json";
+//	private static final String TOGGLE_TASKS_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/tasks/";
+//	private static final String LOGOUT_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/sessions.json";
+	
+	private static final String TASKS_URL = "http://tranquil-sands-8533.herokuapp.com/my_opname.json";
+	private static final String TOGGLE_TASKS_URL = "http://tranquil-sands-8533.herokuapp.com/opnames/";
 	private static final String LOGOUT_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/sessions.json";
+	
+	
+	
 	private SharedPreferences mPreferences;
 
 	@Override
@@ -104,14 +112,14 @@ public class HomeActivity extends SherlockActivity {
 		completeTasksTask.execute(url);
 	}
 
-	private class TaskAdapter extends ArrayAdapter<Task> implements
+	private class TaskAdapter extends ArrayAdapter<Opname> implements
 			OnClickListener {
 
-		private ArrayList<Task> items;
+		private ArrayList<Opname> items;
 		private int layoutResourceId;
 
 		public TaskAdapter(Context context, int layoutResourceId,
-				ArrayList<Task> items) {
+				ArrayList<Opname> items) {
 			super(context, layoutResourceId, items);
 			this.layoutResourceId = layoutResourceId;
 			this.items = items;
@@ -125,16 +133,16 @@ public class HomeActivity extends SherlockActivity {
 				view = (CheckedTextView) layoutInflater.inflate(
 						layoutResourceId, null);
 			}
-			Task task = items.get(position);
-			if (task != null) {
+			Opname opname = items.get(position);
+			if (opname != null) {
 				CheckedTextView taskCheckedTextView = (CheckedTextView) view
 						.findViewById(android.R.id.text1);
 				if (taskCheckedTextView != null) {
-					taskCheckedTextView.setText(task.getTitle());
-					taskCheckedTextView.setChecked(task.getCompleted());
+					taskCheckedTextView.setText(opname.getProduct_name());
+					//taskCheckedTextView.setChecked(task.getCompleted());
 					taskCheckedTextView.setOnClickListener(this);
 				}
-				view.setTag(task.getId());
+				view.setTag(opname.getId());
 			}
 			return view;
 		}
@@ -156,25 +164,50 @@ public class HomeActivity extends SherlockActivity {
 		}
 	}
 
-	private class GetTasksTask extends UrlJsonAsyncTask {
+	private class GetTasksTask extends UrlJsonAsyncTaskForArray {
 		public GetTasksTask(Context context) {
 			super(context);
 		}
 
 		@Override
-		protected void onPostExecute(JSONObject json) {
+		protected void onPostExecute(JSONArray json) {
+			Log.e("Data", json.toString());
 			try {
-				JSONArray jsonTasks = json.getJSONObject("data").getJSONArray(
-						"tasks");
+				JSONArray opnames = json;
 				JSONObject jsonTask = new JSONObject();
-				int length = jsonTasks.length();
-				final ArrayList<Task> tasksArray = new ArrayList<Task>(length);
+				int length = opnames.length();
+				final ArrayList<Opname> tasksArray = new ArrayList<Opname>(length);
 
 				for (int i = 0; i < length; i++) {
-					jsonTask = jsonTasks.getJSONObject(i);
-					tasksArray.add(new Task(jsonTask.getLong("id"), jsonTask
-							.getString("title"), jsonTask
-							.getBoolean("completed")));
+//					"id":67,"product_id":1,"location_id":1,"book_count":100,"actual_count":99,"note":null,"url":"http://tranquil-sands-8533.herokuapp.com/opnames/67.json
+//						","product":{"name":"Nike Magista Opus Firm Ground 
+//						(Volt)"},"location":{"description":"Z1S1H1"}},
+					
+					//
+					jsonTask = opnames.getJSONObject(i);
+					String id= jsonTask.getString("id");
+					String product_id= jsonTask.getString("product_id");
+					String location_id= jsonTask.getString("location_id");
+					String book_count= jsonTask.getString("book_count");
+					String actual_count= jsonTask.getString("actual_count");
+					String note= jsonTask.getString("note");
+					String url= jsonTask.getString("url");
+					String product= jsonTask.getString("product");
+					JSONObject productobj = new JSONObject(product);
+					String product_name=productobj.getString("name");
+					String location= jsonTask.getString("location");
+//					location=location.replace("{", "[");
+//					location=location.replace("}", "]");
+					
+					JSONObject locationobj = new JSONObject(location);
+					
+					location=locationobj.getString("description");
+					
+
+					
+					
+					
+					tasksArray.add(new Opname(product_id, location_id, book_count, actual_count, note, url, location, product_name));
 				}
 
 				ListView tasksListView = (ListView) findViewById(R.id.tasks_list_view);

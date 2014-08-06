@@ -39,7 +39,6 @@ public class RegisterActivity extends SherlockActivity {
 
 		mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 	}
-
 	public void registerNewAccount(View button) {
 		EditText userEmailField = (EditText) findViewById(R.id.userEmail);
 		mUserEmail = userEmailField.getText().toString();
@@ -96,7 +95,6 @@ public class RegisterActivity extends SherlockActivity {
 					post.setEntity(se);
 					post.setHeader("Accept", "application/json");
 					post.setHeader("Content-Type", "application/json");
-
 					ResponseHandler<String> responseHandler = new BasicResponseHandler();
 					response = client.execute(post, responseHandler);
 					json = new JSONObject(response);

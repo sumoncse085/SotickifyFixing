@@ -24,7 +24,8 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.savagelook.android.UrlJsonAsyncTask;
 
 public class LoginActivity extends SherlockActivity {
-
+	
+	//http://tranquil-sands-8533.herokuapp.com/users/sign_in
 	private final static String LOGIN_API_ENDPOINT_URL = "http://tranquil-sands-8533.herokuapp.com/api/v1/sessions.json";
 	private SharedPreferences mPreferences;
 	private String mUserEmail;
@@ -105,13 +106,13 @@ public class LoginActivity extends SherlockActivity {
 
 		@Override
 		protected void onPostExecute(JSONObject json) {
+			Log.e("success", json.toString());
 			try {
 				if (json.getBoolean("success")) {
 					SharedPreferences.Editor editor = mPreferences.edit();
 					editor.putString("AuthToken", json.getJSONObject("data")
 							.getString("auth_token"));
 					editor.commit();
-
 					Intent intent = new Intent(getApplicationContext(),
 							HomeActivity.class);
 					startActivity(intent);
